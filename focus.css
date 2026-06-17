@@ -1,0 +1,220 @@
+/*
+  YouTube Focus Mode - focus.css
+  Hides Shorts, recommendations sidebar, breaking news, premium upsells,
+  and attention-grabbing elements.
+  Uses high-specificity selectors but avoids touching elements that YouTube Enhancer
+  typically modifies (toolbar, player controls, quality menu, playback speed, etc.)
+*/
+
+/* ─── SHORTS: shelf on homepage / subscriptions ───────────────────────────── */
+ytd-reel-shelf-renderer,
+ytd-rich-shelf-renderer[is-shorts],
+ytd-rich-shelf-renderer:has(a[href*="/shorts"]),
+ytd-shelf-renderer:has(a[href*="/shorts"]),
+[is-shorts-grid] {
+  display: none !important;
+}
+
+/* ─── SHORTS: individual short cards in grids ────────────────────────────── */
+ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+ytd-grid-video-renderer:has(a[href*="/shorts/"]),
+ytd-video-renderer:has(a[href*="/shorts/"]) {
+  display: none !important;
+}
+
+/* ─── SHORTS: chips/pills filter on homepage ─────────────────────────────── */
+yt-chip-cloud-chip-renderer:has(a[href*="shorts"]) {
+  display: none !important;
+}
+
+/* ─── RECOMMENDATIONS SIDEBAR (watch page) ───────────────────────────────── */
+/* We never hide #secondary itself — that would collapse the layout and push
+   comments full-width, and would also hide the playlist panel on playlist pages.
+   Instead we only hide ytd-watch-next-secondary-results-renderer (the recs list).
+   ytd-playlist-panel-renderer is a sibling of it inside #secondary, so it
+   stays visible on playlist pages regardless of this setting. */
+html.ytfm-hide-secondary ytd-watch-next-secondary-results-renderer {
+  display: none !important;
+}
+
+ytd-watch-flexy[flexy_] #columns {
+  flex-wrap: nowrap !important;
+}
+
+/* ─── BREAKING NEWS / NEWS SHELF ─────────────────────────────────────────── */
+ytd-rich-shelf-renderer[has-paygated-featured-badge],
+ytd-rich-shelf-renderer:has([aria-label*="news" i]),
+ytd-rich-shelf-renderer:has([aria-label*="breaking" i]),
+ytd-rich-shelf-renderer:has([title*="news" i]),
+ytd-rich-shelf-renderer:has([title*="breaking" i]),
+ytd-shelf-renderer:has([title*="news" i]),
+ytd-shelf-renderer:has([title*="breaking" i]),
+ytd-rich-section-renderer:has([aria-label*="news" i]),
+ytd-rich-section-renderer:has([aria-label*="breaking" i]) {
+  display: none !important;
+}
+
+/* ─── HOMEPAGE DISTRACTIONS ───────────────────────────────────────────────── */
+ytd-rich-shelf-renderer[rendered-from-rich-grid]:has([aria-label*="loop" i]),
+ytd-rich-shelf-renderer:has([aria-label*="people also" i]) {
+  display: none !important;
+}
+
+/* Masthead ad / hero banner */
+ytd-masthead-ad-v4-renderer,
+ytd-masthead-ad-v3-renderer,
+ytd-banner-promo-renderer,
+tp-yt-paper-dialog:has(ytd-mealbar-promo-renderer) {
+  display: none !important;
+}
+
+/* Notification promo popups */
+ytd-popup-container ytd-mealbar-promo-renderer {
+  display: none !important;
+}
+
+/* ─── SIDEBAR: JS text-scan hides entries/sections by adding this class ──── */
+.ytfm-hidden {
+  display: none !important;
+}
+
+/* ─── END-SCREEN / AUTOPLAY OVERLAY ─────────────────────────────────────── */
+.ytd-focus-hide-endscreen .ytp-endscreen-content {
+  display: none !important;
+}
+
+/* ─── CHIPS BAR NOISE ─────────────────────────────────────────────────────── */
+yt-chip-cloud-chip-renderer:has(yt-formatted-string[title="Shorts"]) {
+  display: none !important;
+}
+
+/* ─── MISC ENGAGEMENT BAIT ───────────────────────────────────────────────── */
+ytd-survey-panel-renderer,
+yt-survey-renderer {
+  display: none !important;
+}
+
+/* ─── PREMIUM: every surface YouTube uses to push Premium ───────────────── */
+ytd-mealbar-promo-renderer,
+ytd-popup-container ytd-mealbar-promo-renderer,
+yt-mealbar-promo-renderer,
+ytd-premium-yva-upsell-renderer,
+ytd-primetime-promo-renderer,
+ytd-statement-banner-renderer,
+ytd-ypc-shelf-renderer,
+ytd-ypc-trailer-renderer {
+  display: none !important;
+}
+
+ytd-button-renderer.ytd-masthead[aria-label*="Premium" i],
+a[href*="/premium"],
+a[href*="youtube.com/paid_memberships"],
+ytd-guide-entry-renderer:has(a[href*="/premium"]),
+ytd-mini-guide-entry-renderer:has(a[href*="/premium"]) {
+  display: none !important;
+}
+
+ytd-rich-item-renderer:has(ytd-primetime-promo-renderer),
+ytd-rich-item-renderer:has(ytd-statement-banner-renderer) {
+  display: none !important;
+}
+
+#sections ytd-guide-entry-renderer:has([title*="Premium" i]),
+#sections ytd-guide-entry-renderer:has([aria-label*="Premium" i]) {
+  display: none !important;
+}
+
+tp-yt-paper-dialog:has(ytd-primetime-promo-renderer),
+ytd-enforcement-message-view-model {
+  display: none !important;
+}
+
+ytd-sponsors-shelf-renderer {
+  display: none !important;
+}
+
+ytd-premium-yva-upsell-renderer,
+ytd-mealbar-promo-renderer {
+  display: none !important;
+}
+
+/* ─── SESSION TIMER OVERLAY ──────────────────────────────────────────────── */
+#ytfm-timer {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 9999;
+  background: rgba(10, 10, 10, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 7px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  color: #ccc;
+  cursor: default;
+  pointer-events: auto;
+  user-select: none;
+  transition: opacity 0.2s;
+}
+
+#ytfm-timer:hover { opacity: 0.4; }
+
+#ytfm-timer .ytfm-icon {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+#ytfm-timer .ytfm-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #e8e8e8;
+  letter-spacing: 0.03em;
+}
+
+#ytfm-timer .ytfm-time.ytfm-warn { color: #fbbf24; }
+#ytfm-timer .ytfm-time.ytfm-danger { color: #f87171; }
+
+/* ─── COMMENTS PADDING (optional toggle) ─────────────────────────────────── */
+html.ytfm-pad-comments ytd-comments {
+  padding: 0 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* ─── ASK AI / GEMINI button under video (optional toggle) ───────────────── */
+html.ytfm-hide-ask-ai ytd-watch-metadata yt-button-view-model:has(button[aria-label*="Ask"]),
+html.ytfm-hide-ask-ai ytd-watch-metadata ytd-button-renderer:has(button[aria-label*="Ask"]),
+html.ytfm-hide-ask-ai #flexible-item-buttons yt-button-view-model:has(button[aria-label*="Ask"]),
+html.ytfm-hide-ask-ai yt-button-view-model:has(button[aria-label="Ask"]),
+html.ytfm-hide-ask-ai ytd-ai-overview-entry-point-renderer {
+  display: none !important;
+}
+
+/* ─── HOME FEED: hide recommended video grid ─────────────────────────────── */
+html.ytfm-hide-recs ytd-browse[page-subtype="home"] ytd-rich-grid-renderer {
+  display: none !important;
+}
+
+/* ─── SUBSCRIPTIONS: hide "Most relevant" algorithmic shelf ──────────────── */
+/* ytd-rich-section-renderer is the container YouTube uses for the Most
+   relevant shelf on the subscriptions page — it's distinct from the main
+   grid (ytd-rich-grid-renderer) that shows your actual subscription videos. */
+html.ytfm-hide-most-relevant ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
+  display: none !important;
+}
+
+/* ─── SUBSCRIPTIONS: align "Latest" heading flush with sidebar top ───────── */
+/* The content area normally has top padding that pushes "Latest" below the
+   sidebar's first item. These rules remove it so both align to the same y. */
+html.ytfm-align-subs-top ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer,
+html.ytfm-align-subs-top ytd-browse[page-subtype="subscriptions"] #header.ytd-browse,
+html.ytfm-align-subs-top ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+

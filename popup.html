@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Focus Mode</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e8e8e8;
+      --muted: #888;
+      --accent: #ff4444;
+      --accent-dim: rgba(255, 68, 68, 0.12);
+      --on: #4ade80;
+      --radius: 8px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      width: 288px;
+      padding: 16px;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    h1 { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+    .subtitle { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 12px 0 6px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 4px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .toggle-row:hover { background: #222; border-color: #3a3a3a; }
+    .toggle-row.active {
+      background: var(--accent-dim);
+      border-color: rgba(255, 68, 68, 0.25);
+    }
+
+    .toggle-label { display: flex; flex-direction: column; gap: 2px; }
+    .toggle-name { font-size: 12px; font-weight: 500; }
+    .toggle-desc { font-size: 10px; color: var(--muted); }
+
+    .switch {
+      position: relative;
+      width: 34px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+    .switch input { display: none; }
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #333;
+      border-radius: 18px;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      width: 12px; height: 12px;
+      left: 3px; top: 3px;
+      background: #666;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .switch input:checked + .slider { background: rgba(74, 222, 128, 0.2); }
+    .switch input:checked + .slider::before {
+      transform: translateX(16px);
+      background: var(--on);
+    }
+
+    /* Timer display card */
+    .timer-card {
+      display: none;
+      margin-top: 4px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      align-items: center;
+      justify-content: space-between;
+    }
+    .timer-card.visible { display: flex; }
+
+    .timer-label { font-size: 10px; color: var(--muted); }
+    .timer-value {
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+    .timer-value.warn { color: #fbbf24; }
+    .timer-value.danger { color: #f87171; }
+
+    .timer-reset {
+      font-size: 9px;
+      color: #555;
+      cursor: pointer;
+      padding: 3px 6px;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background: none;
+      color: #777;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .timer-reset:hover { color: #aaa; border-color: #555; }
+
+    .compat-note {
+      margin-top: 12px;
+      padding: 8px 10px;
+      background: rgba(255, 220, 50, 0.06);
+      border: 1px solid rgba(255, 220, 50, 0.15);
+      border-radius: var(--radius);
+      font-size: 10px;
+      color: #aaa;
+      line-height: 1.5;
+    }
+    .compat-note span { color: #ffd632; font-weight: 600; }
+
+    footer { margin-top: 12px; text-align: center; font-size: 9px; color: #444; }
+
+    #kofi-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: rgba(255, 94, 40, 0.08);
+      border: 1px solid rgba(255, 94, 40, 0.2);
+      border-radius: var(--radius);
+      color: #ff7a52;
+      font-size: 11px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    #kofi-link:hover {
+      background: rgba(255, 94, 40, 0.14);
+      border-color: rgba(255, 94, 40, 0.35);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🎯</div>
+    <div>
+      <h1>YouTube Focus Mode</h1>
+      <div class="subtitle">Cut the noise, keep what matters</div>
+    </div>
+  </header>
+
+  <div class="section-label">Core</div>
+
+  <label class="toggle-row" id="row-blockShorts">
+    <div class="toggle-label">
+      <span class="toggle-name">Block Shorts</span>
+      <span class="toggle-desc">Redirect /shorts URLs, hide shelves & cards</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="blockShorts" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideRecommendations">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Recommendations Sidebar</span>
+      <span class="toggle-desc">Removes the "Up next" panel on watch pages</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideRecommendations" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideBreakingNews">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Breaking News</span>
+      <span class="toggle-desc">Removes news shelves from the feed</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideBreakingNews" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hidePremium">
+    <div class="toggle-label">
+      <span class="toggle-name">Block Premium Upsells</span>
+      <span class="toggle-desc">Hides all "Try Premium" banners & popups</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hidePremium" /><div class="slider"></div></div>
+  </label>
+
+  <div class="section-label">Homepage</div>
+
+  <label class="toggle-row" id="row-disableHomepage">
+    <div class="toggle-label">
+      <span class="toggle-name">Redirect Home to Subscriptions</span>
+      <span class="toggle-desc">Visiting youtube.com goes straight to your feed</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="disableHomepage" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-redirectLogo">
+    <div class="toggle-label">
+      <span class="toggle-name">Redirect Logo to Subscriptions</span>
+      <span class="toggle-desc">Clicking the YouTube logo skips the home page</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="redirectLogo" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideRecommendedVideos">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Recommended Videos</span>
+      <span class="toggle-desc">Removes the video grid on the home page</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideRecommendedVideos" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideMostRelevant">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide "Most Relevant" Section</span>
+      <span class="toggle-desc">Removes the algorithmic shelf in your subs feed</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideMostRelevant" /><div class="slider"></div></div>
+  </label>
+
+  <div class="section-label">Guide</div>
+
+  <label class="toggle-row" id="row-hideHomeEntry">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Home Button</span>
+      <span class="toggle-desc">Removes Home from the left guide</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideHomeEntry" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideShortsEntry">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Shorts Button</span>
+      <span class="toggle-desc">Removes Shorts from the left guide</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideShortsEntry" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideExploreSection">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Explore Section</span>
+      <span class="toggle-desc">Removes Trending, Gaming, News, etc.</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideExploreSection" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideSidebarLinks">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide More from YouTube</span>
+      <span class="toggle-desc">Removes Premium, Music, Kids & TV links</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideSidebarLinks" /><div class="slider"></div></div>
+  </label>
+
+  <div class="section-label">Extra</div>
+
+  <label class="toggle-row" id="row-hideAskAi">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide Ask AI Button</span>
+      <span class="toggle-desc">Removes the Gemini AI button under videos</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideAskAi" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-padComments">
+    <div class="toggle-label">
+      <span class="toggle-name">Pad Comments Section</span>
+      <span class="toggle-desc">Adds breathing room so comments don't span full width</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="padComments" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-hideEndscreen">
+    <div class="toggle-label">
+      <span class="toggle-name">Hide End-screen Cards</span>
+      <span class="toggle-desc">No video wall when a video finishes</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="hideEndscreen" /><div class="slider"></div></div>
+  </label>
+
+  <label class="toggle-row" id="row-showTimer">
+    <div class="toggle-label">
+      <span class="toggle-name">Session Timer</span>
+      <span class="toggle-desc">Shows time spent on YouTube this session</span>
+    </div>
+    <div class="switch"><input type="checkbox" id="showTimer" /><div class="slider"></div></div>
+  </label>
+
+  <!-- Timer display, shown when toggle is on -->
+  <div class="timer-card" id="timerCard">
+    <div>
+      <div class="timer-label">This session</div>
+      <div class="timer-value" id="popupTimer">--:--</div>
+    </div>
+    <button class="timer-reset" id="timerReset">Reset</button>
+  </div>
+
+  <div class="compat-note">
+    <span>⚡ YouTube Enhancer compatible</span> — Focus Mode only touches shelves,
+    sidebars, and routing. Player controls, quality settings, and speed selectors
+    are untouched.
+  </div>
+
+  <a id="kofi-link" href="https://ko-fi.com/aidenm6901" target="_blank">
+    ☕ Support on Ko-fi
+  </a>
+
+  <footer>YouTube Focus Mode v1.1</footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
